@@ -1,6 +1,16 @@
 <img width="1907" height="1013" alt="Ekran görüntüsü 2026-06-11 224159" src="https://github.com/user-attachments/assets/eee77d3d-14e6-45b6-a104-d029eb6b6709" />
 <img width="1918" height="1022" alt="Ekran görüntüsü 2026-06-11 223428" src="https://github.com/user-attachments/assets/d5d97fd3-4964-4197-ab15-a4f199633f5a" />
-<img width="1908" height="968" alt="Ekran görüntüsü 2026-06-11 223735" src="https://github.com/user-attachments/assets/1696ed23-d823-4cb2-9866-e656d9cbba91" />
+<img width="1912" height="1017" alt="Ekran görüntüsü 2026-06-11 230223" src="https://github.com/user-attachments/assets/6b1e7b7a-3c06-49e0-ba63-0309a7310fce" />
+<img width="967" height="763" alt="Ekran görüntüsü 2026-06-11 230301" src="https://github.com/user-attachments/assets/e242ba1e-674d-47a7-9abe-bc85a90cf9df" />
+<img width="948" height="745" alt="Ekran görüntüsü 2026-06-11 230339" src="https://github.com/user-attachments/assets/150e33b6-c78c-4563-bebd-d3a3c72c4564" />
+<img width="962" height="741" alt="Ekran görüntüsü 2026-06-11 230408" src="https://github.com/user-attachments/assets/e2454835-9499-47e1-96c0-f420351b51d1" />
+<img width="951" height="715" alt="Ekran görüntüsü 2026-06-11 230442" src="https://github.com/user-attachments/assets/301d8b32-0714-4198-8e91-e126a6cd0037" />
+<img width="952" height="713" alt="Ekran görüntüsü 2026-06-11 230508" src="https://github.com/user-attachments/assets/6e725cfa-5be8-442e-bbce-27b5f8dcf608" />
+<img width="958" height="717" alt="Ekran görüntüsü 2026-06-11 230545" src="https://github.com/user-attachments/assets/c4d7342f-74b4-45d0-ac45-c1280130f70a" />
+<img width="958" height="758" alt="Ekran görüntüsü 2026-06-11 230630" src="https://github.com/user-attachments/assets/6b7cfaa9-b230-4560-9f16-944d48d12b28" />
+<img width="958" height="707" alt="Ekran görüntüsü 2026-06-11 230651" src="https://github.com/user-attachments/assets/01517e49-e5ce-4f25-af7f-a87826bddb94" />
+<img width="952" height="742" alt="Ekran görüntüsü 2026-06-11 230715" src="https://github.com/user-attachments/assets/3cb5ff1c-4e1f-4ca3-aa6c-07838dc4f706" />
+<img width="952" height="688" alt="Ekran görüntüsü 2026-06-11 230749" src="https://github.com/user-attachments/assets/3967a2e8-a9c1-403f-8d53-074bc2024e83" />
 
 # Telco Project
 
@@ -118,7 +128,7 @@ You must write SQL queries to address the scenarios listed below. For each query
 ## Notes
 
 * You have the creative freedom to design the database schema as you see fit, based on the provided dataset.
-* Pay close attention to applying the appropriate data types and constraints when creating your tables.<img width="1908" height="968" alt="Ekran görüntüsü 2026-06-11 223735" src="https://github.com/user-attachments/assets/04861445-6371-49c6-b59a-6850f2ad2410" />
+* Pay close attention to applying the appropriate data types and constraints when creating your tables.
 
 * You may use DBeaver or SQL*Plus to handle the `.csv` data imports into Oracle XE.
 * Thoroughly test each query and document both the SQL statement and its resulting output in your submission.
