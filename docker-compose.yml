@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  oracle-xe:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: telco_oracle
+    ports:
+      - "1521:1521"
+      - "5500:5500"   # Enterprise Manager (opsiyonel)
+    environment:
+      ORACLE_PASSWORD: TelcoPass123   # SYS ve SYSTEM şifresi — değiştirebilirsin
+      ORACLE_DATABASE: TELCODB        # Pluggable DB adı
+      APP_USER: telco_user            # Uygulama kullanıcısı (otomatik oluşturulur)
+      APP_USER_PASSWORD: Telco1234    # Uygulama kullanıcısı şifresi
+    volumes:
+      - oracle_data:/opt/oracle/oradata          # Veri kalıcılığı
+      - ./init-scripts:/container-entrypoint-initdb.d  # Bonus: otomatik tablo oluşturma
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s   # Oracle XE başlamak için zaman alır
+
+volumes:
+  oracle_data:
+    driver: local
