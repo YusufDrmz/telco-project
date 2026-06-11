@@ -6,21 +6,21 @@ services:
     container_name: telco_oracle
     ports:
       - "1521:1521"
-      - "5500:5500"   # Enterprise Manager (opsiyonel)
+      - "5500:5500"   
     environment:
-      ORACLE_PASSWORD: TelcoPass123   # SYS ve SYSTEM şifresi — değiştirebilirsin
-      ORACLE_DATABASE: TELCODB        # Pluggable DB adı
-      APP_USER: telco_user            # Uygulama kullanıcısı (otomatik oluşturulur)
-      APP_USER_PASSWORD: Telco1234    # Uygulama kullanıcısı şifresi
+      ORACLE_PASSWORD: TelcoPass123   
+      ORACLE_DATABASE: TELCODB       
+      APP_USER: telco_user            
+      APP_USER_PASSWORD: Telco1234    
     volumes:
-      - oracle_data:/opt/oracle/oradata          # Veri kalıcılığı
-      - ./init-scripts:/container-entrypoint-initdb.d  # Bonus: otomatik tablo oluşturma
+      - oracle_data:/opt/oracle/oradata         
+      - ./init-scripts:/container-entrypoint-initdb.d  
     healthcheck:
       test: ["CMD", "healthcheck.sh"]
       interval: 30s
       timeout: 10s
       retries: 10
-      start_period: 120s   # Oracle XE başlamak için zaman alır
+      start_period: 120s  
 
 volumes:
   oracle_data:
