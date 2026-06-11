@@ -1,13 +1,12 @@
--- ============================================================
+
 --  TABLE CREATION SCRIPTS
 --  Telco Project - i2i Systems
 --  Oracle XE
--- ============================================================
 
 
--- ------------------------------------------------------------
+
+
 -- 1. TARIFFS
--- ------------------------------------------------------------
 CREATE TABLE TARIFFS (
     TARIFF_ID    NUMBER(5)      PRIMARY KEY,
     NAME         VARCHAR2(100)  NOT NULL,
@@ -36,7 +35,7 @@ CREATE INDEX IDX_CUSTOMERS_CITY ON CUSTOMERS(CITY);
 CREATE INDEX IDX_CUSTOMERS_SIGNUP ON CUSTOMERS(SIGNUP_DATE);
 
 
--- 3. MONTHLY_STATS
+
 CREATE TABLE MONTHLY_STATS (
     ID             NUMBER(10)    PRIMARY KEY,
     CUSTOMER_ID    NUMBER(10)    NOT NULL,
