@@ -1,3 +1,7 @@
+<img width="1907" height="1013" alt="Ekran görüntüsü 2026-06-11 224159" src="https://github.com/user-attachments/assets/eee77d3d-14e6-45b6-a104-d029eb6b6709" />
+<img width="1918" height="1022" alt="Ekran görüntüsü 2026-06-11 223428" src="https://github.com/user-attachments/assets/d5d97fd3-4964-4197-ab15-a4f199633f5a" />
+<img width="1908" height="968" alt="Ekran görüntüsü 2026-06-11 223735" src="https://github.com/user-attachments/assets/1696ed23-d823-4cb2-9866-e656d9cbba91" />
+
 # Telco Project
 
 ## How to Set Up Your Repository
@@ -114,6 +118,7 @@ You must write SQL queries to address the scenarios listed below. For each query
 ## Notes
 
 * You have the creative freedom to design the database schema as you see fit, based on the provided dataset.
-* Pay close attention to applying the appropriate data types and constraints when creating your tables.
+* Pay close attention to applying the appropriate data types and constraints when creating your tables.<img width="1908" height="968" alt="Ekran görüntüsü 2026-06-11 223735" src="https://github.com/user-attachments/assets/04861445-6371-49c6-b59a-6850f2ad2410" />
+
 * You may use DBeaver or SQL*Plus to handle the `.csv` data imports into Oracle XE.
 * Thoroughly test each query and document both the SQL statement and its resulting output in your submission.
