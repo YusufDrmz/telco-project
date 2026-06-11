@@ -5,19 +5,11 @@
 -- ============================================================
 
 
--- ============================================================
--- 1. TARİFE BAZLI MÜŞTERİ SORGULARI
--- ============================================================
-
--- ------------------------------------------------------------
--- 1.1 'Kobiye Destek' tarifesine abone olan müşterileri listele
--- ------------------------------------------------------------
+-- 1.1 List customers subscribed to the 'Kobiye Destek' tariff
 /*
-  YAKLAŞIM:
-  CUSTOMERS tablosunu TARIFFS tablosuyla TARIFF_ID üzerinden JOIN yapıyoruz.
-  WHERE koşulunda tarife adını 'Kobiye Destek' olarak filtreliyoruz.
-  Bu sayede tarife ID'sini hard-code etmeden, isim bazlı esnek bir sorgu elde ediyoruz.
-  Sonuçları müşteri adına göre alfabetik sıralıyoruz.
+  I joined CUSTOMERS with TARIFFS on TARIFF_ID to filter by tariff name.
+  Using the name instead of a hardcoded ID makes the query more flexible.
+  Results are sorted alphabetically by customer name.
 */
 SELECT
     c.CUSTOMER_ID,
@@ -30,17 +22,11 @@ WHERE t.NAME = 'Kobiye Destek'
 ORDER BY c.NAME;
 
 
--- ------------------------------------------------------------
--- 1.2 Bu tarifeye en son abone olan müşteriyi bul
--- ------------------------------------------------------------
+-- 1.2 Find the newest customer subscribed to this tariff
 /*
-  YAKLAŞIM:
-  'Kobiye Destek' tarifesindeki müşteriler arasından SIGNUP_DATE'i
-  en büyük (en yeni tarihli) olanı bulmamız gerekiyor.
-  MAX(SIGNUP_DATE) ile en son tarihi buluyoruz ve bunu WHERE koşuluna
-  koyarak o tarihe sahip müşteri(ler)i getiriyoruz.
-  Aynı tarihte birden fazla kişi kayıt olmuş olabileceğinden
-  tek satır döneceği garanti edilemez; bu yüzden ROWNUM ile kesme yapmıyoruz.
+  I used a subquery to get the MAX(SIGNUP_DATE) among Kobiye Destek subscribers.
+  Then I filtered for customers with that date in the outer query.
+  Multiple customers could share the same latest date, so I didn't limit to one row.
 */
 SELECT
     c.CUSTOMER_ID,
@@ -58,47 +44,30 @@ WHERE t.NAME = 'Kobiye Destek'
   );
 
 
--- ============================================================
--- 2. TARİFE DAĞILIMI
--- ============================================================
-
--- ------------------------------------------------------------
--- 2.1 Müşteriler arasındaki tarife dağılımını bul
--- ------------------------------------------------------------
+-- 2.1 Find the distribution of tariffs among customers
 /*
-  YAKLAŞIM:
-  CUSTOMERS tablosunu TARIFFS ile JOIN yaparak her tarife için
-  abone sayısını COUNT(*) ile hesaplıyoruz.
-  GROUP BY ile tarife bazında gruplama yapıyoruz.
-  Yüzdelik oran da ekliyoruz; bu, toplam müşteri sayısına bölünerek hesaplanıyor.
-  Sonuçları abone sayısına göre azalan sırada döndürüyoruz.
+  I joined TARIFFS and CUSTOMERS and grouped by tariff to count subscribers.
+  I also calculated the percentage of total customers for each tariff.
+  LEFT JOIN is used so tariffs with zero subscribers still appear in the result.
 */
 SELECT
-    t.NAME                                              AS TARIFF_NAME,
+    t.NAME                                             AS TARIFF_NAME,
     t.MONTHLY_FEE,
-    COUNT(c.CUSTOMER_ID)                               AS SUBSCRIBER_COUNT,
+    COUNT(c.CUSTOMER_ID)                              AS SUBSCRIBER_COUNT,
     ROUND(COUNT(c.CUSTOMER_ID) * 100.0 /
-          (SELECT COUNT(*) FROM CUSTOMERS), 2)         AS PERCENTAGE
+          (SELECT COUNT(*) FROM CUSTOMERS), 2)        AS PERCENTAGE
 FROM TARIFFS t
 LEFT JOIN CUSTOMERS c ON t.TARIFF_ID = c.TARIFF_ID
 GROUP BY t.TARIFF_ID, t.NAME, t.MONTHLY_FEE
 ORDER BY SUBSCRIBER_COUNT DESC;
 
 
--- ============================================================
--- 3. MÜŞTERİ KAYIT TARİHİ ANALİZİ
--- ============================================================
-
--- ------------------------------------------------------------
--- 3.1 En erken kaydolan müşterileri bul
--- ------------------------------------------------------------
+-- 3.1 Identify the earliest customers to sign up
 /*
-  YAKLAŞIM:
-  Önce MIN(SIGNUP_DATE) subquery'siyle sistemdeki en eski kayıt tarihini buluyoruz.
-  Ardından bu tarihle eşleşen tüm müşterileri getiriyoruz.
-  NOT: En eski müşteriler en düşük CUSTOMER_ID'ye sahip olmayabilir; ID ataması
-  kayıt tarihinden bağımsız olabilir. Bu yüzden tarih bazlı filtreleme yapıyoruz.
-  Hint'in bu noktaya dikkat çektiğini göz önünde bulundurarak ID yerine DATE kullandık.
+  I used MIN(SIGNUP_DATE) in a subquery to find the earliest date in the system.
+  Then I returned all customers who signed up on that date.
+  As the hint suggests, the earliest customers don't necessarily have the lowest IDs,
+  so filtering by date is the correct approach here.
 */
 SELECT
     c.CUSTOMER_ID,
@@ -112,16 +81,11 @@ WHERE c.SIGNUP_DATE = (SELECT MIN(SIGNUP_DATE) FROM CUSTOMERS)
 ORDER BY c.CUSTOMER_ID;
 
 
--- ------------------------------------------------------------
--- 3.2 Bu en erken müşterilerin şehirlere göre dağılımı
--- ------------------------------------------------------------
+-- 3.2 Distribution of earliest customers across cities
 /*
-  YAKLAŞIM:
-  3.1'deki sorguyu CTE (Common Table Expression) olarak tanımlıyoruz;
-  bu sayede kodun okunabilirliği artıyor ve aynı subquery'yi tekrarlamamıza gerek kalmıyor.
-  En erken müşteri kümesini CTE ile çektikten sonra
-  CITY'ye göre GROUP BY yaparak her şehirdeki müşteri sayısını buluyoruz.
-  Sonuçları müşteri sayısına göre azalan sırada döndürüyoruz.
+  I used a CTE to isolate the earliest customers from query 3.1.
+  This avoids repeating the subquery logic and keeps things readable.
+  Then I grouped by city to get the count per city.
 */
 WITH EARLIEST_CUSTOMERS AS (
     SELECT CITY
@@ -136,21 +100,12 @@ GROUP BY CITY
 ORDER BY CUSTOMER_COUNT DESC;
 
 
--- ============================================================
--- 4. EKSİK AYLIK KAYITLAR
--- ============================================================
-
--- ------------------------------------------------------------
--- 4.1 Aylık kaydı eksik olan müşterilerin ID'lerini bul
--- ------------------------------------------------------------
+-- 4.1 Identify customers with missing monthly records
 /*
-  YAKLAŞIM:
-  Her müşterinin MONTHLY_STATS tablosunda bir kaydı olması gerekiyor.
-  NOT IN ya da NOT EXISTS ile CUSTOMERS'daki tüm ID'leri MONTHLY_STATS'daki
-  CUSTOMER_ID listesiyle karşılaştırıyoruz.
-  NOT EXISTS genellikle büyük veri setlerinde NOT IN'e göre daha performanslıdır
-  çünkü NULL değerlerini daha güvenli işler ve index kullanımı daha etkilidir.
-  Bu yüzden NOT EXISTS tercih ettik.
+  Every customer should have a record in MONTHLY_STATS, but some are missing.
+  I used NOT EXISTS to find customers with no matching entry in that table.
+  NOT EXISTS handles NULLs more safely than NOT IN and tends to perform better
+  on larger datasets.
 */
 SELECT
     c.CUSTOMER_ID,
@@ -167,16 +122,11 @@ WHERE NOT EXISTS (
 ORDER BY c.CUSTOMER_ID;
 
 
--- ------------------------------------------------------------
--- 4.2 Eksik müşterilerin şehirlere göre dağılımı
--- ------------------------------------------------------------
+-- 4.2 Distribution of missing customers across cities
 /*
-  YAKLAŞIM:
-  4.1'deki mantığı yeniden kullanarak eksik müşterileri bir CTE içinde tanımlıyoruz.
-  Ardından bu müşterileri CITY bazında gruplayarak her şehirde kaç kişinin
-  aylık kaydının eksik olduğunu hesaplıyoruz.
-  Şehir bazlı dağılımı bilmek, veri girişi sorunlarının belirli bölgelere
-  mi yoksa rastgele mi dağıldığını anlamaya yardımcı olur.
+  I reused the NOT EXISTS logic inside a CTE to get the missing customers.
+  Then I grouped by city to see how the missing records are spread geographically.
+  This helps determine whether the insertion error affected specific regions or was random.
 */
 WITH MISSING_CUSTOMERS AS (
     SELECT c.CITY
@@ -195,60 +145,47 @@ GROUP BY CITY
 ORDER BY MISSING_COUNT DESC;
 
 
--- ============================================================
--- 5. KULLANIM ANALİZİ
--- ============================================================
-
--- ------------------------------------------------------------
--- 5.1 Veri limitinin en az %75'ini kullanan müşteriler
--- ------------------------------------------------------------
+-- 5.1 Find customers who used at least 75% of their data limit
 /*
-  YAKLAŞIM:
-  CUSTOMERS -> TARIFFS -> MONTHLY_STATS üç tablosunu JOIN yapıyoruz.
-  DATA_LIMIT'i 0 olan tarifeleri (Kurumsal SMS: sadece SMS paketi) hariç tutuyoruz
-  çünkü bu tarifeler için veri kullanım oranı hesaplanamaz (sıfıra bölme hatası).
-  DATA_USAGE / DATA_LIMIT >= 0.75 koşuluyla %75 eşiğini uyguluyoruz.
-  Kullanım yüzdesini de sonuçta gösteriyoruz.
+  I joined all three tables and filtered out tariffs with DATA_LIMIT = 0
+  to avoid division by zero errors.
+  The condition DATA_USAGE / DATA_LIMIT >= 0.75 gives us customers at or above the 75% threshold.
+  I also included the usage percentage in the output for clarity.
 */
 SELECT
     c.CUSTOMER_ID,
     c.NAME,
     c.CITY,
-    t.NAME                                              AS TARIFF_NAME,
+    t.NAME                                             AS TARIFF_NAME,
     ms.DATA_USAGE,
     t.DATA_LIMIT,
-    ROUND(ms.DATA_USAGE / t.DATA_LIMIT * 100, 2)       AS DATA_USAGE_PCT
+    ROUND(ms.DATA_USAGE / t.DATA_LIMIT * 100, 2)      AS DATA_USAGE_PCT
 FROM CUSTOMERS c
-JOIN TARIFFS t      ON c.TARIFF_ID     = t.TARIFF_ID
-JOIN MONTHLY_STATS ms ON c.CUSTOMER_ID = ms.CUSTOMER_ID
+JOIN TARIFFS t        ON c.TARIFF_ID    = t.TARIFF_ID
+JOIN MONTHLY_STATS ms ON c.CUSTOMER_ID  = ms.CUSTOMER_ID
 WHERE t.DATA_LIMIT > 0
   AND ms.DATA_USAGE / t.DATA_LIMIT >= 0.75
 ORDER BY DATA_USAGE_PCT DESC;
 
 
--- ------------------------------------------------------------
--- 5.2 Tüm paket limitlerini (data, dakika, SMS) bitiren müşteriler
--- ------------------------------------------------------------
+-- 5.2 Find customers who exhausted all package limits (data, minutes, and SMS)
 /*
-  YAKLAŞIM:
-  Bir müşterinin tüm limitlerini tüketmiş sayılması için DATA_USAGE >= DATA_LIMIT,
-  MINUTE_USAGE >= MINUTE_LIMIT ve SMS_USAGE >= SMS_LIMIT koşullarının
-  aynı anda sağlanması gerekiyor.
-  DATA_LIMIT = 0 olan tarifeler (ör. Kurumsal SMS) için veri kontrolü atlanmalı;
-  bu yüzden CASE WHEN ile 0 limitli kategorileri ayrıca ele alıyoruz.
-  Böylece yalnızca ilgili limitlere sahip olan kategoriler kontrol ediliyor.
+  A customer counts as fully exhausted only if all three limits are exceeded.
+  For tariffs where a limit is 0 (meaning that category isn't part of the plan),
+  I skip that check using OR conditions so it doesn't incorrectly exclude those customers.
+  All three conditions must be true at the same time for a row to appear.
 */
 SELECT
     c.CUSTOMER_ID,
     c.NAME,
     c.CITY,
-    t.NAME          AS TARIFF_NAME,
-    ms.DATA_USAGE,  t.DATA_LIMIT,
+    t.NAME           AS TARIFF_NAME,
+    ms.DATA_USAGE,   t.DATA_LIMIT,
     ms.MINUTE_USAGE, t.MINUTE_LIMIT,
-    ms.SMS_USAGE,   t.SMS_LIMIT
+    ms.SMS_USAGE,    t.SMS_LIMIT
 FROM CUSTOMERS c
-JOIN TARIFFS t        ON c.TARIFF_ID     = t.TARIFF_ID
-JOIN MONTHLY_STATS ms ON c.CUSTOMER_ID   = ms.CUSTOMER_ID
+JOIN TARIFFS t        ON c.TARIFF_ID    = t.TARIFF_ID
+JOIN MONTHLY_STATS ms ON c.CUSTOMER_ID  = ms.CUSTOMER_ID
 WHERE
     (t.DATA_LIMIT   = 0 OR ms.DATA_USAGE   >= t.DATA_LIMIT)
     AND (t.MINUTE_LIMIT = 0 OR ms.MINUTE_USAGE >= t.MINUTE_LIMIT)
@@ -256,51 +193,37 @@ WHERE
 ORDER BY c.CUSTOMER_ID;
 
 
--- ============================================================
--- 6. ÖDEME ANALİZİ
--- ============================================================
-
--- ------------------------------------------------------------
--- 6.1 Ödemesi yapılmamış müşterileri bul
--- ------------------------------------------------------------
+-- 6.1 Find customers with unpaid fees
 /*
-  YAKLAŞIM:
-  MONTHLY_STATS tablosunda PAYMENT_STATUS = 'UNPAID' olan kayıtları filtreliyoruz.
-  CUSTOMERS ve TARIFFS ile JOIN yaparak müşteri detaylarını ve tarife bilgilerini
-  sonuçlara ekliyoruz; bu, hangi tarifenin ödenmemiş faturasının daha fazla olduğunu
-  görmek açısından da faydalıdır.
-  Sonuçları şehre ve müşteri adına göre sıralıyoruz.
+  I filtered MONTHLY_STATS for PAYMENT_STATUS = 'UNPAID' and joined with
+  CUSTOMERS and TARIFFS to include relevant details in the output.
+  Results are ordered by city and name to make the list easier to read.
 */
 SELECT
     c.CUSTOMER_ID,
     c.NAME,
     c.CITY,
-    t.NAME          AS TARIFF_NAME,
+    t.NAME           AS TARIFF_NAME,
     t.MONTHLY_FEE,
     ms.PAYMENT_STATUS
 FROM CUSTOMERS c
-JOIN TARIFFS t        ON c.TARIFF_ID     = t.TARIFF_ID
-JOIN MONTHLY_STATS ms ON c.CUSTOMER_ID   = ms.CUSTOMER_ID
+JOIN TARIFFS t        ON c.TARIFF_ID    = t.TARIFF_ID
+JOIN MONTHLY_STATS ms ON c.CUSTOMER_ID  = ms.CUSTOMER_ID
 WHERE ms.PAYMENT_STATUS = 'UNPAID'
 ORDER BY c.CITY, c.NAME;
 
 
--- ------------------------------------------------------------
--- 6.2 Tüm ödeme durumlarının tarifelere göre dağılımı
--- ------------------------------------------------------------
+-- 6.2 Distribution of payment statuses across tariffs
 /*
-  YAKLAŞIM:
-  Ödeme durumu (PAYMENT_STATUS) ve tarife adı (TARIFF NAME) bazında gruplama yaparak
-  her kombinasyondaki müşteri sayısını buluyoruz.
-  PIVOT benzeri bir görünüm için satırları COUNT ile özetliyoruz.
-  Hem tarife hem de ödeme durumu bazında toplam satır göstermek için
-  ORDER BY ile okunabilirliği artırıyoruz.
-  Bu dağılım, hangi tarifede ödeme sorunlarının daha fazla olduğunu analiz etmemize olanak tanır.
+  I grouped by tariff name and payment status to count how many customers
+  fall into each combination.
+  I also added a percentage column scoped to each tariff using a window function,
+  which makes it easy to compare payment behavior across different plans.
 */
 SELECT
-    t.NAME                  AS TARIFF_NAME,
+    t.NAME                 AS TARIFF_NAME,
     ms.PAYMENT_STATUS,
-    COUNT(*)                AS COUNT,
+    COUNT(*)               AS COUNT,
     ROUND(COUNT(*) * 100.0 /
         SUM(COUNT(*)) OVER (PARTITION BY t.NAME), 2) AS PCT_WITHIN_TARIFF
 FROM MONTHLY_STATS ms
