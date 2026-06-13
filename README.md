@@ -12,6 +12,67 @@
 <img width="952" height="742" alt="Ekran görüntüsü 2026-06-11 230715" src="https://github.com/user-attachments/assets/3cb5ff1c-4e1f-4ca3-aa6c-07838dc4f706" />
 <img width="952" height="688" alt="Ekran görüntüsü 2026-06-11 230749" src="https://github.com/user-attachments/assets/3967a2e8-a9c1-403f-8d53-074bc2024e83" />
 
+
+## Setup
+
+### Prerequisites
+- Docker Desktop
+- DBeaver Community
+
+### 1. Start the Database
+
+```bash
+docker compose up -d
+```
+
+Wait until the container is healthy (2-3 minutes).
+
+### 2. Create telco_user in DBeaver
+
+First, connect with SYSTEM to create the application user:
+
+| Field | Value |
+|-------|-------|
+| Host | localhost |
+| Port | 1521 |
+| Database | XEPDB1 |
+| Connection Type | Service Name |
+| Username | system |
+| Password | TelcoPass123 |
+
+Then run in SQL Editor:
+
+```sql
+CREATE USER telco_user IDENTIFIED BY Telco1234;
+GRANT CREATE SESSION TO telco_user;
+GRANT CONNECT, RESOURCE TO telco_user;
+GRANT CREATE TABLE TO telco_user;
+GRANT UNLIMITED TABLESPACE TO telco_user;
+```
+
+### 3. Connect as telco_user
+
+Create a second connection with the same settings but:
+- Username: `telco_user`
+- Password: `Telco1234`
+
+### 4. Create Tables
+
+Run `TABLE_CREATION_SCRIPTS.sql` in DBeaver SQL Editor (telco_user connection).
+
+### 5. Import Data
+
+Import CSV files in this order:
+1. TARIFFS.csv
+2. CUSTOMERS.csv
+3. MONTHLY_STATS.csv
+
+### 6. Run Queries
+
+Open `SOLUTIONS.sql` and run each query individually.
+
+--------------------------------------------------------------------
+
 # Telco Project
 
 ## How to Set Up Your Repository
