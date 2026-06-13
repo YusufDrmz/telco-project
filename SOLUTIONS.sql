@@ -3,7 +3,7 @@
 --  Telco Project - i2i Systems
 --  Oracle XE
 -- ============================================================
-
+-- Query results and output screenshots are documented in the README file.
 
 -- 1.1 List customers subscribed to the 'Kobiye Destek' tariff
 /*
